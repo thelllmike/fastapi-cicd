@@ -1,0 +1,36 @@
+name: CI/CD Pipeline with Argo CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t your-dockerhub-username/simple-api:latest .
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.thellmike }}" --password-stdin
+          docker push your-dockerhub-username/simple-api:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to Argo CD
+        uses: argoproj/argocd-actions@v2
+        with:
+          version: v2.9.3
+          username: admin
+          password: ${{ secrets.ARGOCD_PASSWORD }}
+          server: ${{ secrets.ARGOCD_SERVER }}
+          app-name: simple-api
+          action: sync
+          revision: HEAD
