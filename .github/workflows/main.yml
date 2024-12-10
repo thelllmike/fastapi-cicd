@@ -1,4 +1,4 @@
-name: CI/CD Pipeline with Argo CD
+name: CI/CD Pipeline for FastAPI Microservices with Argo CD
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
 
     steps:
       # Step 1: Checkout Code
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v2
 
       # Step 2: Log in to Docker Hub
@@ -21,20 +21,20 @@ jobs:
       # Step 3: Build and Push Patient Service
       - name: Build and Push Patient Service
         run: |
-          docker build -t thellmike/patient-service:latest ./patient_service
-          docker push thellmike/patient-service:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/patient-service:latest ./patient_service
+          docker push ${{ secrets.DOCKER_USERNAME }}/patient-service:latest
 
       # Step 4: Build and Push Appointment Service
       - name: Build and Push Appointment Service
         run: |
-          docker build -t thellmike/appointment-service:latest ./appointment_service
-          docker push thellmike/appointment-service:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/appointment-service:latest ./appointment_service
+          docker push ${{ secrets.DOCKER_USERNAME }}/appointment-service:latest
 
       # Step 5: Build and Push Notification Service
       - name: Build and Push Notification Service
         run: |
-          docker build -t thellmike/notification-service:latest ./notification_service
-          docker push thellmike/notification-service:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/notification-service:latest ./notification_service
+          docker push ${{ secrets.DOCKER_USERNAME }}/notification-service:latest
 
       # Step 6: Install Argo CD CLI
       - name: Install Argo CD CLI
@@ -47,7 +47,7 @@ jobs:
         run: |
           argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
 
-      # Step 8: Trigger Argo CD Sync for All Microservices
+      # Step 8: Sync Applications with Argo CD
       - name: Trigger Argo CD Sync
         run: |
           argocd app sync patient-service
