@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for Multiple Microservices
+name: CI/CD Pipeline with Argo CD
 
 on:
   push:
@@ -10,34 +10,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      # Step 1: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v2
 
+      # Step 2: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # Step 3: Build and Push Patient Service
       - name: Build and Push Patient Service
         run: |
           docker build -t thellmike/patient-service:latest ./patient_service
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
           docker push thellmike/patient-service:latest
 
+      # Step 4: Build and Push Appointment Service
       - name: Build and Push Appointment Service
         run: |
           docker build -t thellmike/appointment-service:latest ./appointment_service
           docker push thellmike/appointment-service:latest
 
+      # Step 5: Build and Push Notification Service
       - name: Build and Push Notification Service
         run: |
           docker build -t thellmike/notification-service:latest ./notification_service
           docker push thellmike/notification-service:latest
 
+      # Step 6: Install Argo CD CLI
       - name: Install Argo CD CLI
         run: |
           curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
           chmod +x /usr/local/bin/argocd
 
-      - name: Login to Argo CD
+      # Step 7: Log in to Argo CD
+      - name: Log in to Argo CD
         run: |
-          argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }}
+          argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
 
+      # Step 8: Trigger Argo CD Sync for All Microservices
       - name: Trigger Argo CD Sync
         run: |
           argocd app sync patient-service
