@@ -29,6 +29,15 @@ jobs:
           docker build -t thellmike/notification-service:latest ./notification_service
           docker push thellmike/notification-service:latest
 
+      - name: Install Argo CD CLI
+        run: |
+          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+
+      - name: Login to Argo CD
+        run: |
+          argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }}
+
       - name: Trigger Argo CD Sync
         run: |
           argocd app sync patient-service
