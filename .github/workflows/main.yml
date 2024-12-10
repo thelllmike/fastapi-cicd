@@ -36,20 +36,20 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/notification-service:latest ./notification_service
           docker push ${{ secrets.DOCKER_USERNAME }}/notification-service:latest
 
-      # Step 6: Install Argo CD CLI
-      - name: Install Argo CD CLI
-        run: |
-          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x /usr/local/bin/argocd
+      # # Step 6: Install Argo CD CLI
+      # - name: Install Argo CD CLI
+      #   run: |
+      #     curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+      #     chmod +x /usr/local/bin/argocd
 
-      # Step 7: Log in to Argo CD
-      - name: Log in to Argo CD
-        run: |
-          argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
+      # # Step 7: Log in to Argo CD
+      # - name: Log in to Argo CD
+      #   run: |
+      #     argocd login ${{ secrets.ARGOCD_SERVER }} --username ${{ secrets.ARGOCD_USERNAME }} --password ${{ secrets.ARGOCD_PASSWORD }} --insecure
 
-      # Step 8: Sync Applications with Argo CD
-      - name: Trigger Argo CD Sync
-        run: |
-          argocd app sync patient-service
-          argocd app sync appointment-service
-          argocd app sync notification-service
+      # # Step 8: Sync Applications with Argo CD
+      # - name: Trigger Argo CD Sync
+      #   run: |
+      #     argocd app sync patient-service
+      #     argocd app sync appointment-service
+      #     argocd app sync notification-service
