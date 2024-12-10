@@ -1,4 +1,4 @@
-name: CI/CD Pipeline with Argo CD
+name: CI/CD Pipeline for Multiple Microservices
 
 on:
   push:
@@ -6,19 +6,31 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Build Docker image
+      - name: Build and Push Patient Service
         run: |
-          docker build -t thellmike/simple-api:latest .
-      
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker build -t thellmike/patient-service:latest ./patient_service
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker push thellmike/patient-service:latest
 
-      - name: Push Docker image to Docker Hub
-        run: docker push thellmike/simple-api:latest
+      - name: Build and Push Appointment Service
+        run: |
+          docker build -t thellmike/appointment-service:latest ./appointment_service
+          docker push thellmike/appointment-service:latest
+
+      - name: Build and Push Notification Service
+        run: |
+          docker build -t thellmike/notification-service:latest ./notification_service
+          docker push thellmike/notification-service:latest
+
+      - name: Trigger Argo CD Sync
+        run: |
+          argocd app sync patient-service
+          argocd app sync appointment-service
+          argocd app sync notification-service
