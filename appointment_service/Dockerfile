@@ -2,7 +2,8 @@ FROM python:3.9
 
 WORKDIR /app
 
-COPY main.py /app
-RUN pip install fastapi uvicorn
+COPY . /app
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+RUN pip install Flask psycopg2-binary
+
+CMD ["python", "appointment_service.py"]
